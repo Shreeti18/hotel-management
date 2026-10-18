@@ -1,0 +1,51 @@
+
+name: Hotel Management CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify project files
+        run: |
+          test -f index.html
+          test -f README.md
+          echo "Project files verified!"
+
+      - name: Validate HTML
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          html = Path("index.html").read_text(encoding="utf-8")
+          HTMLParser().feed(html)
+
+          assert "<html" in html.lower()
+          assert "</html>" in html.lower()
+          assert "<form" in html.lower()
+
+          print("Basic HTML checks passed!")
+          PY
+
+      - name: Build project
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+          echo "Build successful!"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hotel-management-build
+          path: dist/
