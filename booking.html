@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room Booking - Hotel Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      padding: 40px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+    }
+    input, select, button {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hotel Room Booking</h1>
+    <form id="bookingForm">
+      <input type="text" id="guest" placeholder="Guest Name" required>
+
+      <select id="room" required>
+        <option value="">Select Room Type</option>
+        <option value="Standard">Standard Room</option>
+        <option value="Deluxe">Deluxe Room</option>
+        <option value="Suite">Suite Room</option>
+      </select>
+
+      <label for="checkin">Check-in Date</label>
+      <input type="date" id="checkin" required>
+
+      <label for="checkout">Check-out Date</label>
+      <input type="date" id="checkout" required>
+
+      <button type="submit">Book Room</button>
+    </form>
+    <p id="result"></p>
+  </div>
+
+  <script>
+    document.getElementById("bookingForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const guest = document.getElementById("guest").value;
+      const room = document.getElementById("room").value;
+      const checkin = document.getElementById("checkin").value;
+      const checkout = document.getElementById("checkout").value;
+
+      if (checkout <= checkin) {
+        document.getElementById("result").textContent =
+          "Check-out must be after check-in.";
+        return;
+      }
+
+      document.getElementById("result").textContent =
+        `Booking confirmed for ${guest} - ${room} (${checkin} to ${checkout})`;
+    });
+  </script>
+</body>
+</html>
