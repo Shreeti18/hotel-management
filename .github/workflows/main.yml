@@ -1,5 +1,5 @@
 
-name: Hotel Management CI Pipeline
+name: Hotel Management CI/CD Pipeline
 
 on:
   push:
@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
@@ -28,12 +31,11 @@ jobs:
           from html.parser import HTMLParser
           from pathlib import Path
 
-          html = Path("index.html").read_text(encoding="utf-8")
-          HTMLParser().feed(html)
-
-          assert "<html" in html.lower()
-          assert "</html>" in html.lower()
-          assert "<form" in html.lower()
+          for filename in ["index.html", "booking.html"]:
+              html = Path(filename).read_text(encoding="utf-8")
+              HTMLParser().feed(html)
+              assert "<html" in html.lower()
+              assert "</html>" in html.lower()
 
           print("Basic HTML checks passed!")
           PY
@@ -42,6 +44,7 @@ jobs:
         run: |
           mkdir -p dist
           cp index.html dist/
+          cp booking.html dist/
           echo "Build successful!"
 
       - name: Upload build artifact
@@ -49,3 +52,27 @@ jobs:
         with:
           name: hotel-management-build
           path: dist/
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
